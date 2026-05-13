@@ -13,7 +13,7 @@ import { cn } from "@/lib/cn";
 const META = [
   { label: "Role", value: "Product Owner & Lead UX" },
   { label: "Team", value: "3 designers · cross-functional eng & ops" },
-  { label: "Year", value: "2024 — 2025" },
+  { label: "Year", value: "2023 — 2024" },
   { label: "Discipline", value: "Enterprise UX · Design Systems" },
   { label: "Workshop", value: "3 weeks on-site · Germany" },
 ];
