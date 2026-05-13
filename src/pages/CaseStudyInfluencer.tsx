@@ -15,7 +15,7 @@ const META = [
     label: "Team",
     value: "Lead designer + 1 designer · cross-functional eng, product & ML",
   },
-  { label: "Year", value: "2023 — 2024" },
+  { label: "Year", value: "2025" },
   { label: "Discipline", value: "Enterprise UX · AI-driven UX" },
   {
     label: "Foundation",
