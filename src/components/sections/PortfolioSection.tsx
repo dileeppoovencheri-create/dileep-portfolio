@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { projects, type Project, type AccentTone } from "@/data/projects";
 import { ProjectMockup } from "@/components/ui/ProjectMockup";
+import { PasswordModal } from "@/components/ui/PasswordModal";
 import { fadeUp, revealOnView, easeOutExpo } from "@/lib/motion";
 import { useCardTilt } from "@/hooks/useCardTilt";
+import { usePortfolioUnlock } from "@/hooks/usePortfolioUnlock";
 import { cn } from "@/lib/cn";
 
 const accentBg: Record<AccentTone, string> = {
@@ -14,6 +17,31 @@ const accentBg: Record<AccentTone, string> = {
 };
 
 export function PortfolioSection() {
+  const { tryUnlock } = usePortfolioUnlock();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  const handleCardClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    // Always intercept — every "View case study" click should prompt for the
+    // password. The hook auto-relocks whenever the user leaves a case-study
+    // route, so we never need to "skip if already unlocked" here.
+    e.preventDefault();
+    setPendingHref(href);
+  };
+
+  const handleUnlock = (password: string): boolean => {
+    const ok = tryUnlock(password);
+    if (ok && pendingHref) {
+      const target = pendingHref;
+      setPendingHref(null);
+      // Navigate to the case study the user originally clicked.
+      window.location.hash = target.replace(/^#/, "");
+    }
+    return ok;
+  };
+
   return (
     <section id="portfolio" className="relative px-6 py-24 md:px-10 md:py-32">
       <motion.div
@@ -38,9 +66,16 @@ export function PortfolioSection() {
             project={project}
             index={index}
             reverse={index % 2 === 1}
+            onCtaClick={handleCardClick}
           />
         ))}
       </div>
+
+      <PasswordModal
+        open={pendingHref !== null}
+        onClose={() => setPendingHref(null)}
+        onSubmit={handleUnlock}
+      />
     </section>
   );
 }
@@ -49,9 +84,10 @@ interface ProjectCardProps {
   project: Project;
   index: number;
   reverse: boolean;
+  onCtaClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
 }
 
-function ProjectCard({ project, index, reverse }: ProjectCardProps) {
+function ProjectCard({ project, index, reverse, onCtaClick }: ProjectCardProps) {
   const tilt = useCardTilt({ max: 4, perspective: 1600 });
 
   return (
@@ -103,6 +139,7 @@ function ProjectCard({ project, index, reverse }: ProjectCardProps) {
 
           <a
             href={project.href}
+            onClick={(e) => onCtaClick(e, project.href)}
             className={cn(
               "group/btn mt-2 inline-flex items-center gap-2 rounded-full",
               "border border-ink-900/15 bg-white/40 px-5 py-2.5 text-sm font-medium text-ink-900",
